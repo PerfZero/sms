@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import './Registration.css';
+import './ForgotPassword.css';
 
-type RegistrationStep = 'initial' | 'verification' | 'password' | 'success';
+type RecoveryStep = 'initial' | 'verification' | 'password' | 'success';
 
 interface FormErrors {
   iin?: string;
@@ -12,9 +12,9 @@ interface FormErrors {
   confirmPassword?: string;
 }
 
-export const Registration: React.FC = () => {
+const ForgotPassword: React.FC = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState<RegistrationStep>('initial');
+  const [step, setStep] = useState<RecoveryStep>('initial');
   const [iin, setIin] = useState('');
   const [phone, setPhone] = useState('');
   const [verificationCode, setVerificationCode] = useState(['', '', '', '']);
@@ -24,7 +24,7 @@ export const Registration: React.FC = () => {
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     let interval: NodeJS.Timeout;
     if (timer > 0 && !canResend) {
       interval = setInterval(() => {
@@ -88,7 +88,6 @@ export const Registration: React.FC = () => {
     if (value.length !== 12) {
       return 'Введите ИИН полностью';
     }
-    // Здесь можно добавить дополнительную валидацию ИИН
     return undefined;
   };
 
@@ -121,7 +120,7 @@ export const Registration: React.FC = () => {
       setErrors({ verificationCode: 'Введите код полностью' });
       return;
     }
-    // Здесь будет проверка кода
+    // Here you would typically verify the code with your API
     setStep('password');
   };
 
@@ -140,6 +139,7 @@ export const Registration: React.FC = () => {
       return;
     }
 
+    // Here you would typically update the password with your API
     setStep('success');
   };
 
@@ -159,15 +159,13 @@ export const Registration: React.FC = () => {
         <img src="images/logos.svg" alt="Atlas Save" className="registration__logo" />
       </div>
 
-
-
       <div className="registration__content">
         {step === 'initial' && (
           <>
-           <div className="dost_image">
-          <img src="images/dots.svg" alt="" />
-        </div>
-            <h1 className="registration__title">Регистрация аккаунта Atlas</h1>
+            <div className="dost_image login_dost_image">
+              <img src="images/dots.svg" alt="" />
+            </div>
+            <h1 className="registration__title login_title">Восстановление <br /> аккаунта Atlas</h1>
             <div className="registration__form">
               <div className="registration__input-group">
                 <input
@@ -193,19 +191,19 @@ export const Registration: React.FC = () => {
                 />
                 {errors.phone && <div className="registration__error">{errors.phone}</div>}
               </div>
-              <div className="registration__login-link">
+              <div className="registration__login-link mn">
                 <Link to="/login">Вход с аккаунтом Atlas</Link>
+              </div>
+              <div className="registration__login-link mn">
+                <Link to="/registration">Создание аккаунта Atlas</Link>
               </div>
               <button 
                 className="registration__button" 
                 onClick={handleInitialSubmit}
                 disabled={!iin || !phone || iin.length !== 12 || phone.length !== 11}
               >
-                Регистрация
+                Перейти к восстановлению
               </button>
-              <div className="registration__agreement">
-                Регистрируясь, Вы соглашаетесь с <a href="/agreement">Договором офферты</a>
-              </div>
             </div>
           </>
         )}
@@ -215,8 +213,9 @@ export const Registration: React.FC = () => {
             <p className="registration__subtitle">
               Мы отправили Вам СМС с кодом верификации на номер {formatPhone(phone)}
             </p>
-                 <p className="registration__subtitles">
-              Введите его ниже </p>
+            <p className="registration__subtitles">
+              Введите его ниже
+            </p>
             <div className="registration__verification">
               <div className="registration__code-inputs">
                 {verificationCode.map((digit, index) => (
@@ -258,7 +257,7 @@ export const Registration: React.FC = () => {
                 onClick={handleVerificationSubmit}
                 disabled={verificationCode.some(digit => !digit)}
               >
-                Завершить регистрацию
+                Перейти к восстановлению
               </button>
             </div>
           </>
@@ -267,7 +266,7 @@ export const Registration: React.FC = () => {
         {step === 'password' && (
           <>
             <p className="registration__subtitle">Осталось совсем немного.</p>
-                      <p className="registration__subtitle">Создайте пароль для своего аккаунта Atlas</p>
+            <p className="registration__subtitle">Создайте пароль для своего аккаунта Atlas</p>
 
             <div className="registration__form">
               <div className="registration__input-group">
@@ -293,7 +292,7 @@ export const Registration: React.FC = () => {
                 )}
               </div>
               <button className="registration__button" onClick={handlePasswordSubmit}>
-                Завершить регистрацию
+                Завершить восстановление
               </button>
             </div>
           </>
@@ -302,38 +301,13 @@ export const Registration: React.FC = () => {
         {step === 'success' && (
           <>
             <div className="dost_image greeen">
-          <img src="images/dots.svg" alt="" />
-        </div>
-            <h1 className="registration__title sa">Ваш аккаунт Atlas <br /> успешно создан! 
-<br />
-<br />  
-Теперь Вы можете:</h1>
+              <img src="images/dots.svg" alt="" />
+            </div>
+            <h1 className="registration__title sa">Ваш пароль успешно восстановлен!</h1>
             <div className="registration__success hs">
-              <div className="registration__success-item">
-                <img src="images/check.svg" alt="" />
-                <div className="registration__success-item-text">
-                <h3>Начать накапливать</h3>
-                <p>Выбирайте цель и пополняйте счёт через Kaspi.</p>
-                </div>
-              </div>
-              <div className="registration__success-item">      
-                                <img src="images/check.svg" alt="" />
-
-                <div className="registration__success-item-text">
-                <h3>Следить за прогрессом</h3>
-                <p>Отслеживайте, сколько уже накоплено.</p>
-                </div>
-              </div>
-              <div className="registration__success-item">
-                            <img src="images/check.svg" alt="" />
-
-                <div className="registration__success-item-text">
-                <h3>Подарить путь к паломничеству</h3>
-                <p>За себя или близкого человека.</p>
-                </div>
-              </div>
-              <button className="registration__button bottom" onClick={() => navigate('/dashboard')}>
-                Начать копить
+              <p className="registration__subtitle">Вы можете авторизоваться по новому паролю.</p>
+              <button className="registration__button bottom" onClick={() => navigate('/login')}>
+                Авторизоваться
               </button>
             </div>
           </>
@@ -341,4 +315,6 @@ export const Registration: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};
+
+export default ForgotPassword; 

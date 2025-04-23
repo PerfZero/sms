@@ -1,17 +1,9 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
-  Chip,
-} from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import { selectPackage } from '../../store/slices/userSlice';
 import { TourPackage } from '../../types';
+import './PackageSelection.css';
 
 const SAMPLE_PACKAGES: TourPackage[] = [
   {
@@ -57,64 +49,50 @@ const PackageSelection: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="package-selection">
+      <h1 className="package-selection__title">
         Выберите пакет
-      </Typography>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+      </h1>
+      <div className="package-selection__grid">
         {SAMPLE_PACKAGES.map((pkg) => (
-          <Box key={pkg.id} sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-            <Card
-              sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                position: 'relative',
-              }}
-            >
-              {currentUser?.selectedPackage?.id === pkg.id && (
-                <Chip
-                  label="Выбрано"
-                  color="primary"
-                  sx={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                  }}
-                />
-              )}
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography variant="h5" gutterBottom>
-                  {pkg.name}
-                </Typography>
-                <Typography variant="h6" color="primary" gutterBottom>
-                  {pkg.price.toLocaleString()} ₸
-                </Typography>
-                <Typography variant="body1" color="text.secondary" paragraph>
-                  {pkg.description}
-                </Typography>
-                <Typography variant="body2">
-                  Отель: {pkg.hotel}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button
-                  size="large"
-                  variant={currentUser?.selectedPackage?.id === pkg.id ? "outlined" : "contained"}
-                  color="primary"
-                  fullWidth
-                  onClick={() => handleSelectPackage(pkg)}
-                >
-                  {currentUser?.selectedPackage?.id === pkg.id
-                    ? 'Выбрано'
-                    : 'Выбрать пакет'}
-                </Button>
-              </CardActions>
-            </Card>
-          </Box>
+          <div key={pkg.id} className="package-selection__card">
+            {currentUser?.selectedPackage?.id === pkg.id && (
+              <div className="package-selection__badge">
+                Выбрано
+              </div>
+            )}
+            <div className="package-selection__card-content">
+              <h2 className="package-selection__package-name">
+                {pkg.name}
+              </h2>
+              <p className="package-selection__package-price">
+                {pkg.price.toLocaleString()} ₸
+              </p>
+              <p className="package-selection__package-description">
+                {pkg.description}
+              </p>
+              <p className="package-selection__package-hotel">
+                Отель: {pkg.hotel}
+              </p>
+            </div>
+            <div className="package-selection__card-actions">
+              <button
+                className={`package-selection__button ${
+                  currentUser?.selectedPackage?.id === pkg.id
+                    ? 'package-selection__button--selected'
+                    : ''
+                }`}
+                onClick={() => handleSelectPackage(pkg)}
+              >
+                {currentUser?.selectedPackage?.id === pkg.id
+                  ? 'Выбрано'
+                  : 'Выбрать пакет'}
+              </button>
+            </div>
+          </div>
         ))}
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 };
 

@@ -1,16 +1,8 @@
 import React from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Button,
-  CircularProgress,
-  Card,
-  CardContent,
-} from '@mui/material';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
 import { TourPackage } from '../../types';
+import './SaveDashboard.css';
 
 const SaveDashboard: React.FC = () => {
   const { currentUser } = useSelector((state: RootState) => state.user);
@@ -29,99 +21,82 @@ const SaveDashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
+    <div className="save-dashboard">
+      <h1 className="save-dashboard__title">
         Atlas Safe - Накопления
-      </Typography>
+      </h1>
 
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+      <div className="save-dashboard__grid">
         {/* Progress Card */}
-        <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
+        <div className="save-dashboard__card">
+          <div className="save-dashboard__card-content">
+            <h2 className="save-dashboard__card-title">
               Прогресс накоплений
-            </Typography>
-            <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-              <CircularProgress
-                variant="determinate"
-                value={calculateProgress()}
-                size={120}
-              />
-              <Box
-                sx={{
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  position: 'absolute',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
+            </h2>
+            <div className="save-dashboard__progress">
+              <div 
+                className="save-dashboard__progress-circle"
+                style={{ '--progress': `${calculateProgress()}%` } as React.CSSProperties}
               >
-                <Typography variant="caption" component="div" color="text.secondary">
+                <span className="save-dashboard__progress-text">
                   {`${Math.round(calculateProgress())}%`}
-                </Typography>
-              </Box>
-            </Box>
-          </Paper>
-        </Box>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Package Details */}
-        <Box sx={{ flex: '1 1 300px', minWidth: '300px' }}>
-          <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
+        <div className="save-dashboard__card">
+          <div className="save-dashboard__card-content">
+            <h2 className="save-dashboard__card-title">
               Выбранный пакет
-            </Typography>
+            </h2>
             {currentUser?.selectedPackage ? (
               <>
-                <Typography variant="subtitle1">
+                <h3 className="save-dashboard__package-name">
                   {currentUser.selectedPackage.name}
-                </Typography>
-                <Typography variant="body1">
+                </h3>
+                <p className="save-dashboard__package-detail">
                   Стоимость: {currentUser.selectedPackage.price.toLocaleString()} ₸
-                </Typography>
-                <Typography variant="body1">
+                </p>
+                <p className="save-dashboard__package-detail">
                   Отель: {currentUser.selectedPackage.hotel}
-                </Typography>
+                </p>
               </>
             ) : (
-              <Button variant="contained" color="primary">
+              <button className="save-dashboard__button">
                 Выбрать пакет
-              </Button>
+              </button>
             )}
-          </Paper>
-        </Box>
+          </div>
+        </div>
 
         {/* Balance Info */}
-        <Box sx={{ width: '100%' }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Информация о накоплениях
-              </Typography>
-              <Typography variant="body1">
-                Текущий баланс: {currentUser?.balance.toLocaleString()} ₸
-              </Typography>
-              {currentUser?.selectedPackage && (
-                <>
-                  <Typography variant="body1">
-                    Осталось накопить:{' '}
-                    {(
-                      currentUser.selectedPackage.price - currentUser.balance
-                    ).toLocaleString()}{' '}
-                    ₸
-                  </Typography>
-                  <Typography variant="body1">
-                    Примерный срок накопления: {estimateTimeToComplete()} месяцев
-                  </Typography>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
-    </Box>
+        <div className="save-dashboard__card save-dashboard__card--full">
+          <div className="save-dashboard__card-content">
+            <h2 className="save-dashboard__card-title">
+              Информация о накоплениях
+            </h2>
+            <p className="save-dashboard__balance">
+              Текущий баланс: {currentUser?.balance.toLocaleString()} ₸
+            </p>
+            {currentUser?.selectedPackage && (
+              <>
+                <p className="save-dashboard__balance">
+                  Осталось накопить:{' '}
+                  {(currentUser.selectedPackage.price - currentUser.balance).toLocaleString()}{' '}
+                  ₸
+                </p>
+                <p className="save-dashboard__balance">
+                  Примерный срок накопления: {estimateTimeToComplete()} месяцев
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

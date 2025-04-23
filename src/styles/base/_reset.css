@@ -1,3 +1,30 @@
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('../../fonts/SFProDisplay-Regular.woff2') format('woff2'),
+       url('../../fonts/SFProDisplay-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('../../fonts/SFProDisplay-Medium.woff2') format('woff2'),
+       url('../../fonts/SFProDisplay-Medium.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SF Pro Display';
+  src: url('../../fonts/SFProDisplay-Semibold.woff2') format('woff2'),
+       url('../../fonts/SFProDisplay-Semibold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Reset styles */
 * {
   margin: 0;
@@ -6,9 +33,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  margin: 0;
+  font-family: "SF Pro Display", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -17,7 +43,7 @@ button {
   border: none;
   background: none;
   cursor: pointer;
-  font-family: inherit;
+  font-family: "SF Pro Display", sans-serif;
 }
 
 img {
@@ -79,10 +105,10 @@ address {
 /* Form */
 
 input, textarea, button, select {
-	font-family: inherit;
-    font-size: inherit;
-    color: inherit;
-    background-color: transparent;
+  font-family: "SF Pro Display", sans-serif;
+  font-size: inherit;
+  color: inherit;
+  background-color: transparent;
 }
 
 input::-ms-clear {
