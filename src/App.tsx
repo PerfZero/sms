@@ -19,16 +19,17 @@ import PackageSelection from './components/Save/PackageSelection';
 import Login from './components/Auth/Login';
 import { RootState } from './store';
 import { Onboarding } from './components/onboarding/onboarding';
+import { Registration } from './components/registration/Registration';
 import './styles/base/_reset.css';
 
 // Create a theme instance
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1976d2',
+      main: '#35c759',
     },
     secondary: {
-      main: '#dc004e',
+      main: '#2fb750',
     },
   },
   typography: {
@@ -47,7 +48,7 @@ const theme = createTheme({
 // Protected Route component
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
-  return isAuthenticated ? element : <Navigate to="/login" />;
+  return isAuthenticated ? element : <Navigate to="/onboarding" />;
 };
 
 // Layout component with navigation
@@ -80,6 +81,39 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
+// App Routes component
+const AppRoutes: React.FC = () => {
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+
+  return (
+    <Routes>
+      <Route path="/onboarding" element={<Onboarding />} />
+      <Route path="/registration" element={<Registration />} />
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          isAuthenticated ? (
+            <Layout>
+              <SaveDashboard />
+            </Layout>
+          ) : (
+            <Navigate to="/onboarding" />
+          )
+        }
+      />
+      <Route
+        path="/packages"
+        element={
+          <Layout>
+            <ProtectedRoute element={<PackageSelection />} />
+          </Layout>
+        }
+      />
+    </Routes>
+  );
+};
+
 // App component wrapped with providers
 const AppWrapper = () => {
   return (
@@ -87,25 +121,11 @@ const AppWrapper = () => {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Router>
-          <Layout>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<ProtectedRoute element={<SaveDashboard />} />} />
-              <Route path="/packages" element={<ProtectedRoute element={<PackageSelection />} />} />
-            </Routes>
-          </Layout>
+          <AppRoutes />
         </Router>
       </ThemeProvider>
     </Provider>
   );
 };
 
-function App() {
-  return (
-    <div className="app">
-      <Onboarding />
-    </div>
-  );
-}
-
-export default App;
+export default AppWrapper;

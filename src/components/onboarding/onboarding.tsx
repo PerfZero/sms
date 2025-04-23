@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './onboarding.css';
 
 const slides = [
@@ -27,13 +28,13 @@ const slides = [
 
 export const Onboarding: React.FC = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const navigate = useNavigate();
 
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      // Здесь будет переход на основной экран
-      console.log('Переход на основной экран');
+      navigate('/registration');
     }
   };
 
@@ -44,8 +45,7 @@ export const Onboarding: React.FC = () => {
   };
 
   const handleSkip = () => {
-    // Здесь будет переход на основной экран
-    console.log('Пропуск онбординга');
+    navigate('/registration');
   };
 
   return (
