@@ -171,7 +171,9 @@ export const Registration: React.FC = () => {
             <div className="registration__form">
               <div className="registration__input-group">
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={formatIin(iin)}
                   onChange={handleIinChange}
                   placeholder="Введите свой ИИН"
@@ -181,7 +183,9 @@ export const Registration: React.FC = () => {
               </div>
               <div className="registration__input-group">
                 <input
-                  type="text"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   value={formatPhone(phone)}
                   onChange={handlePhoneChange}
                   placeholder="Введите свой номер телефона"
@@ -218,7 +222,9 @@ export const Registration: React.FC = () => {
                 {verificationCode.map((digit, index) => (
                   <input
                     key={index}
-                    type="text"
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="0"
                     name={`code-${index}`}
                     value={digit}
@@ -265,21 +271,21 @@ export const Registration: React.FC = () => {
 
             <div className="registration__form">
               <div className="registration__input-group">
-                <label>Введите пароль</label>
                 <input
                   type="password"
                   value={password}
+                  placeholder="Введите пароль"
                   onChange={handlePasswordChange}
                   className={errors.password ? 'error' : ''}
                 />
                 {errors.password && <div className="registration__error">{errors.password}</div>}
               </div>
               <div className="registration__input-group">
-                <label>Подтвердите пароль</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
+                  placeholder="Подтвердите пароль"
                   className={errors.confirmPassword ? 'error' : ''}
                 />
                 {errors.confirmPassword && (
