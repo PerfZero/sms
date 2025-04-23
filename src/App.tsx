@@ -12,6 +12,7 @@ import { Registration } from './components/registration/Registration';
 import ForgotPassword from './components/Auth/ForgotPassword';
 import Profile from './components/Profile/Profile';
 import Toolbar from './components/Toolbar/Toolbar';
+import Goals from './components/Goals/Goals';
 import './styles/base/_reset.css';
 
 // Protected Route component
@@ -45,6 +46,14 @@ const AppRoutes: React.FC = () => {
         element={
           <Layout>
             <ProtectedRoute element={<Profile />} />
+          </Layout>
+        }
+      />
+      <Route
+        path="/goals"
+        element={
+          <Layout>
+            <ProtectedRoute element={<Goals />} />
           </Layout>
         }
       />

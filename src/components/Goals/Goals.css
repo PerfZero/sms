@@ -1,0 +1,95 @@
+.goals {
+
+  height: 100%;
+  background-color: #fff;
+  font-family: "SF Pro Display", sans-serif;
+}
+
+.goals__header {
+  padding: 16px;
+  background-color: #F7F8FB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title_header{
+  border-bottom: 0.50px solid rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+  font-size: 16px;
+  text-align: center;
+  color: #000;
+  padding: 18px 0;
+}
+
+.goals__empty-state{
+  display: flex;
+  flex-direction: column;
+}
+
+.goals__title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
+}
+
+.goals__content {
+  padding: 16px;
+  height: 77dvh;
+  display: flex
+;
+}
+
+
+.goals__empty-title {
+  font-weight: 600;
+  font-size: 32px;
+  color: #222;
+}
+
+.goals__empty-description {
+  font-size: 24px;
+  font-weight: 600;
+  color: #222;
+  margin-top: 16px;
+}
+
+.goals__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: auto;
+}
+
+.goals__button {
+  display: inline-block;
+  padding: 16px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  width: 100%;
+}
+
+.goals__button--primary {
+  background-color: #F14635;
+  color: #fff;
+}
+
+.goals__button--primary:hover {
+  background-color: #d93d2d;
+}
+
+.goals__button--secondary {
+  background-color: #f5f5f5;
+  color: #000;
+}
+
+.goals__button--secondary:hover {
+  background-color: #e8e8e8;
+} 
