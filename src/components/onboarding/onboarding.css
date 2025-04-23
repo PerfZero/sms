@@ -3,7 +3,6 @@
   flex-direction: column;
   background-color: #FFFFFF;
   position: relative;
-  height: 100vh;
 
   
 }
@@ -32,7 +31,7 @@
 
   display: flex;
   flex-direction: column;
-height: 100vh;
+
   padding: 20px 0 0;
 }
 
@@ -60,7 +59,7 @@ height: 100vh;
 .onboarding__image {
   max-width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 32px 32px 0 0;
   width: 100%;
   margin:  32px 0 0;
