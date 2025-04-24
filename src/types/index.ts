@@ -1,6 +1,7 @@
 export interface User {
   iin: string;
   phoneNumber: string;
+  name?: string;
   fullName?: string;
   balance: number;
   selectedPackage?: TourPackage;

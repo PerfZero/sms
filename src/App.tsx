@@ -11,13 +11,17 @@ import { Onboarding } from './components/onboarding/onboarding';
 import { Registration } from './components/registration/Registration';
 import ForgotPassword from './components/Auth/ForgotPassword';
 import Profile from './components/Profile/Profile';
+import Home from './components/Home/Home';
+
 import Toolbar from './components/Toolbar/Toolbar';
 import Goals from './components/Goals/Goals';
 import './styles/base/_reset.css';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  // Временно отключаем проверку аутентификации
+  // const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  const isAuthenticated = true; // Временное решение
   return isAuthenticated ? element : <Navigate to="/onboarding" />;
 };
 
@@ -33,7 +37,9 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // App Routes component
 const AppRoutes: React.FC = () => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  // Временно отключаем проверку аутентификации
+  // const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  const isAuthenticated = true; // Временное решение
 
   return (
     <Routes>
@@ -60,13 +66,9 @@ const AppRoutes: React.FC = () => {
       <Route
         path="/"
         element={
-          isAuthenticated ? (
-            <Layout>
-              <Profile />
-            </Layout>
-          ) : (
-            <Navigate to="/onboarding" />
-          )
+          <Layout>
+            <Home />
+          </Layout>
         }
       />
       <Route
