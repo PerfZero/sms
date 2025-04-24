@@ -46,7 +46,7 @@ const Home: React.FC = () => {
                <div className="home__balance-label-container">
                  <span className="home__balance-label home__balance-label--active">Ваш баланс</span>
                  <button className="home__balance-toggle" onClick={toggleBalance}>
-                   <img src={showBalance ? "/images/eye-open.svg" : "/images/eye-closed.svg"} alt="Toggle balance" /> 
+                   <img src={showBalance ? "/images/yes.svg" : "/images/yes.svg"} alt="Toggle balance" /> 
                  </button>
                </div>
 
