@@ -22,10 +22,8 @@ import './styles/base/_reset.css';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
-  // Временно отключаем проверку аутентификации
-  // const { isAuthenticated } = useSelector((state: RootState) => state.user);
-  const isAuthenticated = true; // Временное решение
-  return isAuthenticated ? element : <Navigate to="/onboarding" />;
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  return isAuthenticated ? element : <Navigate to="/onboarding" replace />;
 };
 
 // Layout component with navigation
@@ -40,9 +38,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // App Routes component
 const AppRoutes: React.FC = () => {
-  // Временно отключаем проверку аутентификации
-  // const { isAuthenticated } = useSelector((state: RootState) => state.user);
-  const isAuthenticated = true; // Временное решение
+  const { isAuthenticated } = useSelector((state: RootState) => state.user);
 
   return (
     <Routes>
@@ -86,7 +82,7 @@ const AppRoutes: React.FC = () => {
         path="/"
         element={
           <Layout>
-            <Home />
+            <ProtectedRoute element={<Home />} />
           </Layout>
         }
       />
