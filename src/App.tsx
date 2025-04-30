@@ -12,6 +12,9 @@ import { Registration } from './components/registration/Registration';
 import ForgotPassword from './components/Auth/ForgotPassword';
 import Profile from './components/Profile/Profile';
 import Home from './components/Home/Home';
+import SelfGoalSteps from './components/Goals/SelfGoalSteps';
+import FamilyGoalSteps from './components/Goals/FamilyGoalSteps';
+import History from './components/History/History';
 
 import Toolbar from './components/Toolbar/Toolbar';
 import Goals from './components/Goals/Goals';
@@ -64,6 +67,22 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
+        path="/self-goal-steps"
+        element={
+          <Layout>
+            <ProtectedRoute element={<SelfGoalSteps />} />
+          </Layout>
+        }
+      />
+      <Route
+        path="/family"
+        element={
+          <Layout>
+            <ProtectedRoute element={<FamilyGoalSteps />} />
+          </Layout>
+        }
+      />
+      <Route
         path="/"
         element={
           <Layout>
@@ -76,6 +95,14 @@ const AppRoutes: React.FC = () => {
         element={
           <Layout>
             <ProtectedRoute element={<PackageSelection />} />
+          </Layout>
+        }
+      />
+      <Route
+        path="/history"
+        element={
+          <Layout>
+            <ProtectedRoute element={<History />} />
           </Layout>
         }
       />

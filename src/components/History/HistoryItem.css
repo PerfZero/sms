@@ -1,0 +1,72 @@
+.history-item {
+
+}
+
+.history-item__icon {
+  width: 28px;
+  height: 28px;
+  background: #eafbe7;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+}
+
+.history-item__check {
+  color: #2ecc40;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.history-item__iin {
+  flex: 1;
+  font-size: 16px;
+  color: #222;
+  font-weight: 500;
+}
+
+.history-item__amount {
+  font-size: 16px;
+  color: #222;
+  font-weight: 600;
+  margin-right: 16px;
+}
+
+.history-item__arrow {
+  color: #bdbdbd;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-item__info {
+  flex: 1;
+}
+
+.history-item__type {
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.history-item__description {
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.history-item__date {
+  font-size: 12px;
+  color: #999;
+}
+
+.history-item__amount--positive {
+  color: #4CAF50;
+}
+
+.history-item__amount--negative {
+  color: #F44336;
+} 

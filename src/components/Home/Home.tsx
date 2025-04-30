@@ -44,7 +44,7 @@ const Home: React.FC = () => {
              
              <div className="home__balance-card home__balance-card--active">
                <div className="home__balance-label-container">
-                 <span className="home__balance-label home__balance-label--active">Ваш баланс</span>
+                 <span className="home__balance-label--active">Ваш баланс</span>
                  <button className="home__balance-toggle" onClick={toggleBalance}>
                    <img src={showBalance ? "/images/yes.svg" : "/images/yes.svg"} alt="Toggle balance" /> 
                  </button>
@@ -66,7 +66,7 @@ const Home: React.FC = () => {
                </div>
                
                <div className="home__goal-section">
-                 <span className="home__balance-label home__balance-label--active">Ваша цель</span>
+                 <span className=" home__balance-label--active">Ваша цель</span>
                  <div className="home__goal-details">
                    <img src="/images/homes.svg" alt="Goal icon" className="home__goal-icon" /> {/* Иконка цели */}
                    <span className="home__goal-name">{goal.name}</span>
