@@ -1,5 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { User, TourPackage } from '../../types';
+import { TourPackage } from '../../types';
+
+export interface User {
+  iin: string;
+  phoneNumber: string;
+  balance: number;
+  isFirstLogin: boolean;
+  role: 'USER' | 'ADMIN';
+  selectedPackage?: TourPackage;
+  name?: string;
+}
 
 interface UserState {
   currentUser: User | null;
@@ -8,9 +18,23 @@ interface UserState {
   error: string | null;
 }
 
+// Вспомогательные функции для работы с localStorage
+const saveUserToStorage = (user: User) => {
+  localStorage.setItem('user', JSON.stringify(user));
+};
+
+const removeUserFromStorage = () => {
+  localStorage.removeItem('user');
+};
+
+const loadUserFromStorage = (): User | null => {
+  const userStr = localStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+};
+
 const initialState: UserState = {
-  currentUser: null,
-  isAuthenticated: false,
+  currentUser: loadUserFromStorage(),
+  isAuthenticated: !!loadUserFromStorage(),
   loading: false,
   error: null,
 };
@@ -19,31 +43,36 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUser: (state: UserState, action: PayloadAction<User>) => {
+    setUser: (state, action: PayloadAction<User>) => {
       state.currentUser = action.payload;
       state.isAuthenticated = true;
       state.error = null;
+      saveUserToStorage(action.payload);
     },
-    setLoading: (state: UserState, action: PayloadAction<boolean>) => {
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
     },
-    setError: (state: UserState, action: PayloadAction<string>) => {
+    setError: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
     },
-    updateBalance: (state: UserState, action: PayloadAction<number>) => {
+    updateBalance: (state, action: PayloadAction<number>) => {
       if (state.currentUser) {
         state.currentUser.balance = action.payload;
+        saveUserToStorage(state.currentUser);
       }
     },
-    selectPackage: (state: UserState, action: PayloadAction<TourPackage>) => {
+    selectPackage: (state, action: PayloadAction<TourPackage>) => {
       if (state.currentUser) {
         state.currentUser.selectedPackage = action.payload;
+        saveUserToStorage(state.currentUser);
       }
     },
-    logout: (state: UserState) => {
+    logout: (state) => {
       state.currentUser = null;
       state.isAuthenticated = false;
       state.error = null;
+      localStorage.removeItem('token');
+      removeUserFromStorage();
     },
   },
 });

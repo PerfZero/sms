@@ -1,22 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HistoryItem from './HistoryItem';
+import { balanceService, Transaction } from '../../services/api';
 import './History.css';
 
-// Мок-данные в новом формате
-const mockHistory = [
-  { id: 1, iin: '791212000222', amount: 100000, date: '2024-05-25' },
-  { id: 2, iin: '791212000222', amount: 100000, date: '2024-05-24' },
-  { id: 3, iin: '791212000222', amount: 100000, date: '2024-05-24' },
-  { id: 4, iin: '791212000222', amount: 100000, date: '2024-05-24' },
-  { id: 5, iin: '791212000222', amount: 100000, date: '2024-05-20' },
-  { id: 6, iin: '791212000222', amount: 100000, date: '2024-05-20' },
-  { id: 7, iin: '791212000222', amount: 100000, date: '2024-05-20' },
-];
-
 // Группировка по дате
-const groupByDate = (items: typeof mockHistory) => {
-  return items.reduce((acc: Record<string, typeof mockHistory>, item) => {
+const groupByDate = (items: Transaction[]) => {
+  return items.reduce((acc: Record<string, Transaction[]>, item) => {
     if (!acc[item.date]) acc[item.date] = [];
     acc[item.date].push(item);
     return acc;
@@ -30,7 +20,30 @@ const formatDate = (dateStr: string) => {
 
 const History: React.FC = () => {
   const [search, setSearch] = useState('');
-  const filtered = mockHistory.filter(item => item.iin.includes(search));
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const data = await balanceService.getTransactions();
+        setTransactions(data);
+      } catch (err) {
+        setError('Не удалось загрузить историю транзакций');
+        console.error('Error fetching transactions:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
+
+  const filtered = transactions.filter(item => 
+    item.iin.includes(search) || 
+    item.name.toLowerCase().includes(search.toLowerCase())
+  );
   const grouped = groupByDate(filtered);
   const sortedDates = Object.keys(grouped).sort((a, b) => b.localeCompare(a));
 
@@ -40,7 +53,7 @@ const History: React.FC = () => {
         <img src="/images/logos.svg" alt="Atlas Save" className="profile__logo" />
       </div>
       <div className="goals__header-title-container bod">
-        <Link to="/goals" className="goals__back">
+        <Link to="/" className="goals__back">
           ← Главная
         </Link>
         <div className="goals__header-title">История</div>
@@ -50,20 +63,38 @@ const History: React.FC = () => {
         <input
           className="history__search"
           type="text"
-          placeholder="Поиск по ИИН"
+          placeholder="Поиск по ИИН или имени"
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
       </div>
       <div className="history__list">
-        {sortedDates.map(date => (
-          <div className="history__date-group" key={date}>
-            <div className="history__date-title">{formatDate(date)}</div>
-            {grouped[date].map(item => (
-              <HistoryItem key={item.id} iin={item.iin} amount={item.amount} />
-            ))}
+        {isLoading ? (
+          <div className="history__loading">Загрузка...</div>
+        ) : error ? (
+          <div className="history__error">{error}</div>
+        ) : sortedDates.length === 0 ? (
+          <div className="history__empty">
+            {search ? 'Ничего не найдено' : 'История пуста'}
           </div>
-        ))}
+        ) : (
+          sortedDates.map(date => (
+            <div className="history__date-group" key={date}>
+              <div className="history__date-title">{formatDate(date)}</div>
+              {grouped[date].map(item => (
+                <HistoryItem 
+                  key={item.id} 
+                  iin={item.iin} 
+                  amount={item.amount}
+                  name={item.name}
+                  type={item.type}
+                  status={item.status}
+                  description={item.description}
+                />
+              ))}
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

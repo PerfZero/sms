@@ -19,10 +19,17 @@ import History from './components/History/History';
 import Toolbar from './components/Toolbar/Toolbar';
 import Goals from './components/Goals/Goals';
 import './styles/base/_reset.css';
+import { useAuthInit } from './hooks/useAuthInit';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.user);
+  const { isAuthenticated, loading } = useSelector((state: RootState) => state.user);
+  
+  if (loading) {
+    // Можно добавить компонент загрузки
+    return <div>Загрузка...</div>;
+  }
+  
   return isAuthenticated ? element : <Navigate to="/onboarding" replace />;
 };
 
@@ -38,6 +45,7 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 // App Routes component
 const AppRoutes: React.FC = () => {
+  useAuthInit();
   const { isAuthenticated } = useSelector((state: RootState) => state.user);
 
   return (

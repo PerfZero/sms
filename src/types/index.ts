@@ -6,6 +6,7 @@ export interface User {
   balance: number;
   selectedPackage?: TourPackage;
   isFirstLogin: boolean;
+  role: 'USER' | 'ADMIN';
 }
 
 export interface TourPackage {

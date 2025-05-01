@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { goalService } from '../../services/api';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -10,7 +11,8 @@ import { ReactComponent as UmrahIcon } from './icons/umrah_1.svg';
 import { ReactComponent as HajjIcon } from './icons/hajj_1.svg';
 import { ReactComponent as CheckIcon } from './icons/check.svg';
 
-const SelfGoalSteps: React.FC = () => {
+const FamilyGoalSteps: React.FC = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPilgrimage, setSelectedPilgrimage] = useState('');
   const [selectedPackage, setSelectedPackage] = useState('');
@@ -167,7 +169,7 @@ const SelfGoalSteps: React.FC = () => {
       setCurrentStep(4);
     } else if (currentStep === 4) {
       setIsThirdStepConfirmed(true);
-      // Здесь будет логика сохранения и перехода к пополнению
+      handleSubmit(false); // По умолчанию сохраняем без перехода к депозиту
     }
   };
 
@@ -220,6 +222,49 @@ const SelfGoalSteps: React.FC = () => {
     const max = parseInt(e.target.max);
     const percentage = ((value - min) / (max - min)) * 100;
     e.target.style.background = `linear-gradient(to right, #35c759 0%, #35c759 ${percentage}%, rgba(120, 120, 128, 0.16) ${percentage}%, rgba(120, 120, 128, 0.16) 100%)`;
+  };
+
+  const handleSubmit = async (withDeposit: boolean = false) => {
+    try {
+      if (!selectedPackage || !selectedPilgrimage) {
+        console.error('Не выбран пакет или тип паломничества');
+        return;
+      }
+
+      const selectedPackageData = packages.find(p => p.id === selectedPackage);
+      if (!selectedPackageData) {
+        console.error('Не найден выбранный пакет');
+        return;
+      }
+
+      const targetAmount = parseFloat(selectedPackageData.price.replace(/\s/g, ''));
+      
+      console.log('Отправляем данные:', {
+        fullName: relativeData.fullName,
+        iin: relativeData.iin,
+        type: selectedPilgrimage.toUpperCase(),
+        packageType: selectedPackage.toUpperCase(),
+        targetAmount,
+        monthlyTarget: monthlyPayment
+      });
+
+      await goalService.createFamilyGoal({
+        fullName: relativeData.fullName,
+        iin: relativeData.iin,
+        type: selectedPilgrimage.toUpperCase() as 'UMRAH' | 'HAJJ',
+        packageType: selectedPackage.toUpperCase() as 'PREMIUM' | 'COMFORT' | 'STANDARD',
+        targetAmount,
+        monthlyTarget: monthlyPayment
+      });
+
+      if (withDeposit) {
+        navigate('/?deposit=true');
+      } else {
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error creating family goal:', error);
+    }
   };
 
   const renderStepContent = () => {
@@ -423,11 +468,11 @@ const SelfGoalSteps: React.FC = () => {
               <div className="verfi_cont">
                 <div className="verify-field">
                   <span className="verify-label">ФИО</span>
-                  <span className="verify-value">Иванов Иван Иванович</span>
+                  <span className="verify-value">{relativeData.fullName}</span>
                 </div>
                 <div className="verify-field">
                   <span className="verify-label">ИИН</span>
-                  <span className="verify-value">890919300267</span>
+                  <span className="verify-value">{relativeData.iin}</span>
                 </div>
                 <div className="verify-field">
                   <span className="verify-label">Тип паломничества</span>
@@ -435,19 +480,28 @@ const SelfGoalSteps: React.FC = () => {
                 </div>
                 <div className="verify-field">
                   <span className="verify-label">Турпакет</span>
-                  <span className="verify-value green">Premium Package</span>
+                  <span className="verify-value green">{
+                    packages.find(p => p.id === selectedPackage)?.name || ''
+                  }</span>
                 </div>
                 <div className="verify-field">
                   <span className="verify-label">Стоимость</span>
-                  <span className="verify-value">{packages[0].price} ₸</span>
+                  <span className="verify-value">{
+                    packages.find(p => p.id === selectedPackage)?.price || ''
+                  } ₸</span>
                 </div>
               </div>
               <div className="saving-period">
                 <h3>Укажите примерный срок накопления <span className="saving-period-value">{months} месяца</span></h3>
-                <input type="range" min="1" max="48" value={months} onChange={(e) => {
-                  setMonths(parseInt(e.target.value));
-                  updateSliderBackground(e);
-                }}
+                <input 
+                  type="range" 
+                  min="1" 
+                  max="48" 
+                  value={months} 
+                  onChange={(e) => {
+                    setMonths(parseInt(e.target.value));
+                    updateSliderBackground(e);
+                  }}
                   className="period-slider"
                 />
               </div>
@@ -461,10 +515,16 @@ const SelfGoalSteps: React.FC = () => {
               </div>
 
               <div className="goals__actions">
-                <button className="goals__next-button bnx" onClick={handleNext}>
+                <button 
+                  className="goals__next-button bnx" 
+                  onClick={() => handleSubmit(false)}
+                >
                   Сохранить
                 </button>
-                <button className="goals__submit-button bnx" onClick={handleNext}>
+                <button 
+                  className="goals__submit-button bnx" 
+                  onClick={() => handleSubmit(true)}
+                >
                   Сохранить и перейти к пополнению
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5.17282 21.7672C6.42514 16.572 4.93852 16.3943 4.93852 13.8735C4.93852 13.0332 5.60104 11.0214 5.69799 10.0438C5.92421 7.79773 5.36673 8.39561 7.00687 6.73124L7.10382 4.42051C7.92793 3.62872 8.33998 2.91772 9.34992 3.16819C9.96396 4.99415 8.80051 4.42051 8.6874 6.55349C9.37415 7.46647 9.83469 7.55535 10.3518 8.70263C11.0062 10.1569 10.5376 10.1408 11.7738 11.3608C13.5916 11.5709 14.6905 11.5789 15.9913 10.2701C16.1286 8.8723 15.3207 8.9935 16.1448 7.70886C16.7103 6.82819 17.2678 6.3515 18.3262 6.707C18.6736 8.08051 17.1143 8.3633 17.5991 9.89032C19.6917 10.1004 20.1764 7.21601 21.7762 7.07058C21.7762 10.1489 18.5605 10.5528 18.4878 13.0575C18.4393 14.6249 19.829 18.9393 21.2348 19.8604C22.471 17.9617 23.8041 15.8934 23.9576 13.5988C25.0322 -2.05924 4.3164 -4.91129 0.381689 8.79959C0.179702 9.5025 0.0585095 10.2135 0.00195312 10.9245V12.7424C0.349371 17.2507 3.12871 21.2097 5.17282 21.7672Z" fill="white" />
@@ -539,4 +599,4 @@ const SelfGoalSteps: React.FC = () => {
   );
 };
 
-export default SelfGoalSteps; 
+export default FamilyGoalSteps; 

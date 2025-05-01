@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import { goalService } from '../../services/api';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -11,6 +12,7 @@ import { ReactComponent as HajjIcon } from './icons/hajj_1.svg';
 import { ReactComponent as CheckIcon } from './icons/check.svg';
 
 const SelfGoalSteps: React.FC = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPilgrimage, setSelectedPilgrimage] = useState('');
   const [selectedPackage, setSelectedPackage] = useState('');
@@ -131,6 +133,33 @@ const SelfGoalSteps: React.FC = () => {
     setSelectedPilgrimage(type);
   };
 
+  const handleSaveGoal = async (shouldRedirectToDeposit: boolean) => {
+    try {
+      const selectedPkg = packages.find(pkg => pkg.id === selectedPackage);
+      if (!selectedPkg) return;
+
+      const targetAmount = parseInt(selectedPkg.price.replace(/\s/g, ''));
+      
+      await goalService.createSelfGoal({
+        type: selectedPilgrimage.toUpperCase() as 'UMRAH' | 'HAJJ',
+        packageType: selectedPackage.toUpperCase() as 'PREMIUM' | 'COMFORT' | 'STANDARD',
+        targetAmount,
+        monthlyTarget: monthlyPayment,
+        currentAmount: 0
+      });
+
+      // После успешного создания цели
+      if (shouldRedirectToDeposit) {
+        navigate('/?deposit=true'); // Перенаправляем на главную с флагом для открытия модалки депозита
+      } else {
+        navigate('/'); // Просто перенаправляем на главную
+      }
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      // Здесь можно добавить отображение ошибки пользователю
+    }
+  };
+
   const handleNext = () => {
     if (currentStep === 1 && selectedPilgrimage) {
       setIsFirstStepConfirmed(true);
@@ -140,7 +169,7 @@ const SelfGoalSteps: React.FC = () => {
       setCurrentStep(3);
     } else if (currentStep === 3) {
       setIsThirdStepConfirmed(true);
-      // Здесь будет логика сохранения и перехода к пополнению
+      handleSaveGoal(false); // Просто сохраняем без перехода к депозиту
     }
   };
 
@@ -384,10 +413,16 @@ const SelfGoalSteps: React.FC = () => {
               </div>
 
               <div className="goals__actions">
-                <button className="goals__next-button bnx" onClick={handleNext}>
+                <button 
+                  className="goals__next-button bnx" 
+                  onClick={() => handleSaveGoal(false)}
+                >
                   Сохранить
                 </button>
-                <button className="goals__submit-button bnx" onClick={handleNext}>
+                <button 
+                  className="goals__submit-button bnx" 
+                  onClick={() => handleSaveGoal(true)}
+                >
                   Сохранить и перейти к пополнению
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5.17282 21.7672C6.42514 16.572 4.93852 16.3943 4.93852 13.8735C4.93852 13.0332 5.60104 11.0214 5.69799 10.0438C5.92421 7.79773 5.36673 8.39561 7.00687 6.73124L7.10382 4.42051C7.92793 3.62872 8.33998 2.91772 9.34992 3.16819C9.96396 4.99415 8.80051 4.42051 8.6874 6.55349C9.37415 7.46647 9.83469 7.55535 10.3518 8.70263C11.0062 10.1569 10.5376 10.1408 11.7738 11.3608C13.5916 11.5709 14.6905 11.5789 15.9913 10.2701C16.1286 8.8723 15.3207 8.9935 16.1448 7.70886C16.7103 6.82819 17.2678 6.3515 18.3262 6.707C18.6736 8.08051 17.1143 8.3633 17.5991 9.89032C19.6917 10.1004 20.1764 7.21601 21.7762 7.07058C21.7762 10.1489 18.5605 10.5528 18.4878 13.0575C18.4393 14.6249 19.829 18.9393 21.2348 19.8604C22.471 17.9617 23.8041 15.8934 23.9576 13.5988C25.0322 -2.05924 4.3164 -4.91129 0.381689 8.79959C0.179702 9.5025 0.0585095 10.2135 0.00195312 10.9245V12.7424C0.349371 17.2507 3.12871 21.2097 5.17282 21.7672Z" fill="white" />

@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import './Registration.css';
+import { authService, userService, AuthResponse, ProfileResponse } from '../../services/api';
+import { setUser } from '../../store/slices/userSlice';
+import { User } from '../../types';
 
 type RegistrationStep = 'initial' | 'verification' | 'password' | 'success';
+
+interface RegistrationResponse {
+  message: string;
+  token: string;
+}
 
 interface FormErrors {
   iin?: string;
@@ -14,6 +23,7 @@ interface FormErrors {
 
 export const Registration: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [step, setStep] = useState<RegistrationStep>('initial');
   const [iin, setIin] = useState('');
   const [phone, setPhone] = useState('');
@@ -23,6 +33,11 @@ export const Registration: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
+  const [iinError, setIINError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
 
   React.useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -48,7 +63,7 @@ export const Registration: React.FC = () => {
     const value = e.target.value.replace(/\D/g, '');
     if (value.length <= 12) {
       setIin(value);
-      setErrors(prev => ({ ...prev, iin: undefined }));
+      setIINError(null);
     }
   };
 
@@ -56,7 +71,7 @@ export const Registration: React.FC = () => {
     const value = e.target.value.replace(/\D/g, '');
     if (value.length <= 11) {
       setPhone(value);
-      setErrors(prev => ({ ...prev, phone: undefined }));
+      setPhoneError(null);
     }
   };
 
@@ -84,73 +99,111 @@ export const Registration: React.FC = () => {
     setErrors(prev => ({ ...prev, confirmPassword: undefined }));
   };
 
-  const validateIin = (value: string) => {
+  const validateIin = (value: string): string | null => {
     if (value.length !== 12) {
-      return 'Введите ИИН полностью';
+      return 'ИИН должен содержать 12 цифр';
     }
-    // Здесь можно добавить дополнительную валидацию ИИН
-    return undefined;
+    return null;
   };
 
-  const validatePhone = (value: string) => {
+  const validatePhone = (value: string): string | null => {
     if (value.length !== 11) {
-      return 'Введите номер телефона полностью';
+      return 'Номер телефона должен содержать 11 цифр';
     }
-    return undefined;
+    return null;
   };
 
-  const handleInitialSubmit = () => {
-    const newErrors: FormErrors = {};
-    const iinError = validateIin(iin);
-    const phoneError = validatePhone(phone);
+  const validatePassword = (password: string): boolean => {
+    return password.length >= 8;
+  };
 
-    if (iinError) newErrors.iin = iinError;
-    if (phoneError) newErrors.phone = phoneError;
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+  const handleInitialSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (iin.length !== 12) {
+      setIINError('ИИН должен содержать 12 цифр');
       return;
     }
-
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (cleanPhone.length !== 11) {
+      setPhoneError('Номер телефона должен содержать 11 цифр');
+      return;
+    }
     setStep('verification');
   };
 
-  const handleVerificationSubmit = () => {
+  const handleVerificationSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     const code = verificationCode.join('');
-    if (code.length !== 4) {
-      setErrors({ verificationCode: 'Введите код полностью' });
+    if (!code || code.length !== 4) {
+      setVerificationError('Введите код подтверждения');
       return;
     }
-    // Здесь будет проверка кода
     setStep('password');
   };
 
-  const handlePasswordSubmit = () => {
-    const newErrors: FormErrors = {};
-    
-    if (password.length < 6) {
-      newErrors.password = 'Пароль должен содержать минимум 6 символов';
-    }
-    if (password !== confirmPassword) {
-      newErrors.confirmPassword = 'Пароли не совпадают';
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validatePassword(password)) {
+      setPasswordError('Пароль должен содержать минимум 8 символов');
       return;
     }
-
-    setStep('success');
-  };
-
-  const formatPhone = (phone: string) => {
-    if (!phone) return '';
-    return `+7 (${phone.slice(1, 4)}) ${phone.slice(4, 7)}-${phone.slice(7, 9)}-${phone.slice(9, 11)}`;
-  };
-
-  const formatIin = (iin: string) => {
-    if (!iin) return '';
-    return iin.replace(/(\d{3})(\d{3})(\d{3})(\d{3})/, '$1 $2 $3 $4');
+    if (password !== confirmPassword) {
+      setConfirmPasswordError('Пароли не совпадают');
+      return;
+    }
+    const code = verificationCode.join('');
+    try {
+      console.log('=== Registration Submit Start ===');
+      console.log('Registration data:', { iin, phone, code, password });
+      
+      const response = await authService.register({
+        iin,
+        phone,
+        code,
+        password
+      }) as AuthResponse;
+      
+      console.log('Registration response:', response);
+      
+      if (!response.token) {
+        throw new Error('Token not received from server');
+      }
+      
+      // Очищаем старый токен если есть и сохраняем новый
+      localStorage.removeItem('token');
+      localStorage.setItem('token', response.token);
+      
+      try {
+        console.log('=== Getting Profile Start ===');
+        const profileData = await userService.getProfile();
+        console.log('Profile data from server:', profileData);
+        
+        // Преобразуем данные в формат User
+        const userData: User = {
+          iin: profileData.iin,
+          phoneNumber: profileData.phone,
+          balance: profileData.balance?.amount || 0,
+          isFirstLogin: true,
+          role: profileData.role === 'ADMIN' ? 'ADMIN' : 'USER',
+          name: profileData.name || ''
+        };
+        
+        console.log('Transformed user data:', userData);
+        dispatch(setUser(userData));
+        setStep('success');
+      } catch (profileError) {
+        console.error('Profile fetch error:', profileError);
+        localStorage.removeItem('token');
+        throw new Error('Не удалось получить данные профиля. Попробуйте войти через страницу входа.');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      if (error instanceof Error) {
+        setPasswordError(`Ошибка при регистрации: ${error.message}`);
+      } else {
+        setPasswordError('Ошибка при регистрации. Попробуйте позже.');
+      }
+    }
   };
 
   return (
@@ -158,8 +211,6 @@ export const Registration: React.FC = () => {
       <div className="registration__header">
         <img src="images/logos.svg" alt="Atlas Save" className="registration__logo" />
       </div>
-
-
 
       <div className="registration__content">
         {step === 'initial' && (
@@ -169,43 +220,47 @@ export const Registration: React.FC = () => {
         </div>
             <h1 className="registration__title">Регистрация аккаунта Atlas</h1>
             <div className="registration__form">
-              <div className="registration__input-group">
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={formatIin(iin)}
-                  onChange={handleIinChange}
-                  placeholder="Введите свой ИИН"
-                  className={errors.iin ? 'error' : ''}
-                />
-                {errors.iin && <div className="registration__error">{errors.iin}</div>}
-              </div>
-              <div className="registration__input-group">
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={formatPhone(phone)}
-                  onChange={handlePhoneChange}
-                  placeholder="Введите свой номер телефона"
-                  className={errors.phone ? 'error' : ''}
-                />
-                {errors.phone && <div className="registration__error">{errors.phone}</div>}
-              </div>
-              <div className="registration__login-link">
-                <Link to="/login">Вход с аккаунтом Atlas</Link>
-              </div>
-              <button 
-                className="registration__button" 
-                onClick={handleInitialSubmit}
-                disabled={!iin || !phone || iin.length !== 12 || phone.length !== 11}
-              >
-                Регистрация
-              </button>
-              <div className="registration__agreement">
-                Регистрируясь, Вы соглашаетесь с <a href="/agreement">Договором офферты</a>
-              </div>
+              <form onSubmit={handleInitialSubmit}>
+                <div className="registration__input-group">
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={iin}
+                    onChange={handleIinChange}
+                    placeholder="Введите свой ИИН"
+                    maxLength={12}
+                    className={iinError ? 'error' : ''}
+                  />
+                  {iinError && <div className="registration__error">{iinError}</div>}
+                </div>
+                <div className="registration__input-group">
+                  <input
+                    type="tel"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    value={phone}
+                    onChange={handlePhoneChange}
+                    placeholder="Введите свой номер телефона"
+                    maxLength={11}
+                    className={phoneError ? 'error' : ''}
+                  />
+                  {phoneError && <div className="registration__error">{phoneError}</div>}
+                </div>
+                <div className="registration__login-link">
+                  <Link to="/login">Вход с аккаунтом Atlas</Link>
+                </div>
+                <button 
+                  type="submit"
+                  className="registration__button" 
+                  disabled={!iin || !phone}
+                >
+                  Регистрация
+                </button>
+                <div className="registration__agreement">
+                  Регистрируясь, Вы соглашаетесь с <a href="/agreement">Договором офферты</a>
+                </div>
+              </form>
             </div>
           </>
         )}
@@ -213,7 +268,7 @@ export const Registration: React.FC = () => {
         {step === 'verification' && (
           <>
             <p className="registration__subtitle">
-              Мы отправили Вам СМС с кодом верификации на номер {formatPhone(phone)}
+              Мы отправили Вам СМС с кодом верификации на номер {phone}
             </p>
                  <p className="registration__subtitles">
               Введите его ниже </p>
@@ -332,7 +387,7 @@ export const Registration: React.FC = () => {
                 <p>За себя или близкого человека.</p>
                 </div>
               </div>
-              <button className="registration__button bottom" onClick={() => navigate('/dashboard')}>
+              <button className="registration__button bottom" onClick={() => navigate('/')}>
                 Начать копить
               </button>
             </div>

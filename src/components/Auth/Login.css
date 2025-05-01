@@ -218,3 +218,10 @@ text-decoration-skip-ink: none;
 text-align: center;
 color: #35c759;
 }
+
+.sms-hint {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+  text-align: center;
+}

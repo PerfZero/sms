@@ -1,0 +1,243 @@
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
+
+const api = axios.create({
+  baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Добавляем интерцептор для автоматического добавления токена
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Добавляем интерцептор для обработки ответов
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { status: number; data: unknown } };
+      if (axiosError.response?.status === 401) {
+        localStorage.removeItem('token');
+        // Можно добавить редирект на страницу логина при необходимости
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
+export interface AuthResponse {
+  token: string;
+  user: {
+    id: number;
+    iin: string;
+    role?: string;
+    phone?: string;
+    name?: string;
+  };
+  message: string;
+}
+
+export const authService = {
+  login: async (iin: string, password: string): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>('/auth/login', { iin, password });
+    return response.data;
+  },
+
+  register: async (data: { iin: string; phone: string; code: string; password: string }): Promise<AuthResponse> => {
+    const response = await api.post<AuthResponse>('/auth/register', data);
+    return response.data;
+  },
+
+  verifyCode: async (iin: string, code: string) => {
+    const response = await api.post('/auth/verify-code', { iin, code });
+    return response.data;
+  },
+
+  completeRegistration: async (iin: string, password: string) => {
+    const response = await api.post('/auth/complete-registration', { iin, password });
+    return response.data;
+  }
+};
+
+export interface ProfileResponse {
+  iin: string;
+  phone: string;
+  role: string;
+  name: string;
+  balance?: {
+    amount: number;
+  };
+}
+
+export const userService = {
+  getProfile: async (): Promise<ProfileResponse> => {
+    try {
+      const response = await api.get<ProfileResponse>('/auth/profile');
+      return response.data;
+    } catch (error: unknown) {
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { status: number; data: unknown } };
+        if (axiosError.response?.status === 401) {
+          localStorage.removeItem('token');
+          window.location.href = '/login';
+        }
+      }
+      throw error;
+    }
+  }
+};
+
+export interface TransactionResponse {
+  balance: {
+    id: number;
+    amount: number;
+    userId: number;
+  };
+  transaction: {
+    amount: number;
+    iin: string;
+    name: string;
+    transactionId: string;
+    timestamp: string;
+    goalId?: number;
+    goal?: {
+      currentAmount: number;
+      targetAmount: number;
+      relativeName: string;
+    };
+    bonus?: number;
+    isFirstDeposit?: boolean;
+  };
+}
+
+export interface Transaction {
+  id: number;
+  amount: number;
+  type: 'DEPOSIT' | 'WITHDRAWAL';
+  status: 'PENDING' | 'COMPLETED' | 'FAILED';
+  description: string;
+  iin: string;
+  name: string;
+  goalId?: number;
+  goal?: {
+    currentAmount: number;
+    targetAmount: number;
+    relativeName: string;
+  };
+  date: string;
+}
+
+export const balanceService = {
+  getBalance: async () => {
+    const response = await api.get('/balance');
+    return response.data;
+  },
+  
+  deposit: async (amount: number, goalId: number | null = null): Promise<TransactionResponse> => {
+    // Если указан goalId, делаем депозит в конкретную цель
+    if (goalId) {
+      const response = await api.post<TransactionResponse>(`/goals/${goalId}/deposit`, { amount });
+      return response.data;
+    }
+    // Иначе делаем обычный депозит в общий баланс
+    const response = await api.post<TransactionResponse>('/balance/deposit', { amount });
+    return response.data;
+  },
+
+  getTransactions: async (): Promise<Transaction[]> => {
+    const response = await api.get<Transaction[]>('/balance/transactions');
+    return response.data;
+  }
+};
+
+export interface Goal {
+  id: number;
+  type: 'UMRAH' | 'HAJJ';
+  packageType: 'PREMIUM' | 'COMFORT' | 'STANDARD';
+  targetAmount: number;
+  currentAmount: number;
+  monthlyTarget: number;
+  relativeId?: number;
+  relative?: {
+    id: number;
+    fullName: string;
+    iin: string;
+  };
+}
+
+export const goalService = {
+  getGoal: async (): Promise<Goal | null> => {
+    const response = await api.get<Goal[]>('/goals');
+    // Возвращаем первую цель из массива, если она есть
+    return Array.isArray(response.data) && response.data.length > 0 ? response.data[0] : null;
+  },
+  
+  getAllGoals: async (): Promise<Goal[]> => {
+    const response = await api.get<Goal[]>('/goals');
+    return response.data;
+  },
+
+  createSelfGoal: async (data: { 
+    type: 'UMRAH' | 'HAJJ',
+    packageType: 'PREMIUM' | 'COMFORT' | 'STANDARD',
+    targetAmount: number,
+    monthlyTarget: number,
+    currentAmount: number
+  }): Promise<Goal> => {
+    const response = await api.post<Goal>('/goals/self', data);
+    return response.data;
+  },
+
+  createFamilyGoal: async (data: { 
+    fullName: string,
+    iin: string,
+    type: 'UMRAH' | 'HAJJ',
+    packageType: 'PREMIUM' | 'COMFORT' | 'STANDARD',
+    targetAmount: number,
+    monthlyTarget: number 
+  }): Promise<Goal> => {
+    try {
+      console.log('Отправка запроса на создание цели для родственника:', data);
+      const response = await api.post<Goal>('/goals/family', data);
+      console.log('Ответ сервера:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Ошибка при создании цели для родственника:', error);
+      throw error;
+    }
+  },
+  
+  updateProgress: async (goalId: number, amount: number): Promise<Goal> => {
+    const response = await api.patch<Goal>(`/goals/${goalId}/progress`, { amount });
+    return response.data;
+  }
+};
+
+export interface Relative {
+  id: number;
+  fullName: string;
+  iin: string;
+  goal?: Goal;
+}
+
+export const relativesService = {
+  getRelatives: async (): Promise<Relative[]> => {
+    const response = await api.get<Relative[]>('/relatives');
+    return response.data;
+  }
+};
+
+export default api; 
