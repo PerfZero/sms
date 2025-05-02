@@ -17,6 +17,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [iin, setIin] = useState('');
   const [password, setPassword] = useState('');
+  const [stayLoggedIn, setStayLoggedIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -79,7 +80,10 @@ const Login: React.FC = () => {
         <img src="images/logos.svg" alt="Atlas Save" className="registration__logo" />
       </div>
       <div className="registration__content">
-        <h1 className="registration__title login_title">Вход с аккаунтом Atlas</h1>
+        <div className="dost_image login_dost_image">
+          <img src="images/dots.svg" alt="" />
+        </div>
+        <h1 className="registration__title login_title">Вход <br /> с аккаунтом Atlas</h1>
         <div className="registration__form">
           {error && <div className="error-message">{error}</div>}
           <form onSubmit={handleSubmit}>
@@ -101,17 +105,33 @@ const Login: React.FC = () => {
                 value={password}
                 onChange={handlePasswordChange}
               />
+              <div className="registration__checkbox-group">
+                <input
+                  type="checkbox"
+                  className="registration__checkbox"
+                  checked={stayLoggedIn}
+                  onChange={(e) => setStayLoggedIn(e.target.checked)}
+                  id="stayLoggedIn"
+                />
+                <label className="registration__checkbox-label" htmlFor="stayLoggedIn">
+                  <span>Оставаться в системе</span>
+                </label>
+              </div>
+            </div>
+            <div className="registration__login-link mbp">
+              <Link to="/forgot-password">Забыли пароль?</Link>
+            </div>
+            <div className="registration__login-link mbp">
+              <Link to="/registration">Создание аккаунта Atlas</Link>
             </div>
             <button
               type="submit"
               className="registration__button"
-              disabled={isLoading}
+              disabled={isLoading || !iin || !password || iin.length !== 12 || password.length < 6}
             >
               {isLoading ? 'Вход...' : 'Войти'}
             </button>
-            <div className="registration__login-link">
-              <Link to="/registration">Нет аккаунта? Зарегистрироваться</Link>
-            </div>
+           
           </form>
         </div>
       </div>

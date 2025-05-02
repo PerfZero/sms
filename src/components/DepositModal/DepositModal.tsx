@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import Modal from '../Modal/Modal';
-import { balanceService } from '../../services/api';
+import { balanceService, Transaction } from '../../services/api';
 import './DepositModal.css';
 
 interface DepositModalProps {
   isOpen: boolean;
-  onClose: (transaction?: any) => void;
+  onClose: (transaction?: Transaction) => void;
   goalId?: number | null;
   goalInfo?: {
     relativeName: string;
@@ -17,8 +18,14 @@ interface DepositModalProps {
 const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, goalId, goalInfo }) => {
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [lastTransaction, setLastTransaction] = useState<any>(null);
+  const currentUser = useSelector((state: any) => state.user.currentUser);
+
+  // Сбрасываем значение при каждом открытии модального окна
+  useEffect(() => {
+    if (isOpen) {
+      setAmount('');
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,8 +35,31 @@ const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, goalId, go
     try {
       const numericAmount = parseFloat(amount.replace(/[^0-9.]/g, ''));
       const response = await balanceService.deposit(numericAmount, goalId);
-      setLastTransaction(response.transaction);
-      setSuccess(true);
+      
+      console.log('Server response:', response);
+      
+      // Преобразуем ответ от сервера в формат Transaction
+      const transaction: Transaction = {
+        id: response.transaction.id || Date.now(),
+        transactionNumber: response.transaction.transactionNumber,
+        amount: response.transaction.amount,
+        type: 'DEPOSIT',
+        status: 'COMPLETED',
+        description: 'Пополнение баланса',
+        iin: currentUser?.iin || response.transaction.iin || '',
+        name: currentUser?.name || response.transaction.name || '',
+        date: response.transaction.date || new Date().toISOString(),
+        bonus: response.transaction.bonus || 0,
+        isFirstDeposit: response.transaction.isFirstDeposit,
+        goal: response.transaction.goal
+      };
+
+      console.log('Transformed transaction:', transaction);
+      
+      // Сбрасываем значение поля ввода
+      setAmount('');
+      // Закрываем модалку и передаем транзакцию
+      onClose(transaction);
     } catch (error) {
       console.error('Error making deposit:', error);
     } finally {
@@ -47,58 +77,11 @@ const DepositModal: React.FC<DepositModalProps> = ({ isOpen, onClose, goalId, go
     }
   };
 
-  const handleClose = () => {
-    onClose(lastTransaction);
-    setAmount('');
-    setSuccess(false);
-    setLastTransaction(null);
-  };
-
-  if (success && lastTransaction) {
-    return (
-      <Modal isOpen={isOpen} onClose={handleClose}>
-        <div className="deposit-modal">
-          <div className="deposit-modal__success">
-            <h2>Успешно!</h2>
-            <p>Ваш счет пополнен на:</p>
-            <div className="deposit-modal__amount">
-              {lastTransaction.amount.toLocaleString()} ₸
-            </div>
-
-            {lastTransaction.goal && (
-              <div className="deposit-modal__goal-info">
-                <p>Средства зачислены на цель:</p>
-                <strong>{lastTransaction.goal.relativeName}</strong>
-                <div className="deposit-modal__progress">
-                  <div>Прогресс цели:</div>
-                  <div>{Math.round((lastTransaction.goal.currentAmount / lastTransaction.goal.targetAmount) * 100)}%</div>
-                </div>
-              </div>
-            )}
-
-            {lastTransaction.isFirstDeposit && lastTransaction.bonus && (
-              <div className="deposit-modal__bonus">
-                <div className="deposit-modal__bonus-header">
-                  <img src="/images/gift.svg" alt="Bonus" />
-                  <h4>Бонус за первое пополнение!</h4>
-                </div>
-                <div className="deposit-modal__bonus-amount">
-                  +{lastTransaction.bonus.toLocaleString()} ₸
-                </div>
-              </div>
-            )}
-
-            <button className="deposit-modal__submit" onClick={handleClose}>
-              Закрыть
-            </button>
-          </div>
-        </div>
-      </Modal>
-    );
-  }
-
   return (
-    <Modal isOpen={isOpen} onClose={() => onClose()}>
+    <Modal isOpen={isOpen} onClose={() => {
+      setAmount(''); // Сбрасываем значение при закрытии
+      onClose();
+    }}>
       <div className="deposit-modal">
         <h2 className="deposit-modal__title">
           {goalInfo ? `Пополнение цели: ${goalInfo.relativeName}` : 'Пополнение счета'}

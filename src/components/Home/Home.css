@@ -271,18 +271,167 @@ width: 100%;
   margin-bottom: 16px;
 }
 
-.home__relatives-card {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 24px;
-  background: linear-gradient(135deg, #fff 0%, #e2e2e2 100%);
-  padding: 16px;
-  height: 281px;
+.home__relatives-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  position: relative;
+}
 
+.home__relatives-card {
+  position: relative;
+  padding: 20px;
+  border-radius: 24px;
+  background-image: url('../../../public/images/back_card.svg');
+
+  color: white;
+  margin-top: -10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+  transition: all 0.3s ease;
+  height: 70px;
+  overflow: hidden;
+}
+
+.home__relatives-card:first-child {
+  margin-top: 0;
+}
+
+.home__relatives-card:hover, .home__relatives-card:active, .home__relatives-card:focus {
+  height: 353Px;
+  z-index: 2;
+  transform: translateY(-5px);
+}
+
+.home__relative-header {
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 3;
+  height: 30px;
+  cursor: pointer;
+}
+
+.home__relative-relation {
+  font-weight: 600;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  position: relative;
+}
+
+.home__relative-separator {
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 300;
+}
+
+.home__relative-navigate {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #fff;
+  text-decoration: none;
+}
+
+.home__relative-navigate img {
+  width: 16px;
+  height: 16px;
+}
+
+.home__goal-details .home__relative-navigate {
+  margin-left: auto;
+  color: white;
+  text-decoration: none;
+}
+
+.white {
+  font-weight: 500;
+  font-size: 16px;
+  color: #222;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.home__relative-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 
 
+.home__relative-balance {
+  margin-bottom: 16px;
+}
 
+.home__relative-amount {
+  font-weight: 700;
+  font-size: 24px;
+  color: #fff;
+  margin: 4px 0;
+}
+
+.home__relative-currency {
+  font-size: 20px;
+}
+
+.home__relative-dollar {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.home__relative-progress {
+  margin-bottom: 16px;
+}
+
+.home__relative-percentage {
+font-weight: 700;
+font-size: 100px;
+text-align: right;
+color: rgba(255, 255, 255, 0.5);
+position: absolute;
+bottom: 112px;
+right: 16px;
+}
+
+.home__relative-balance-label{
+  font-weight: 500;
+font-size: 12px;
+color: #fff;
+}
+
+
+.home__relative-target {
+  margin-bottom: 20px;
+}
+
+.home__relative-target-label {
+  font-weight: 500;
+  font-size: 12px;
+  color: #fff;
+}
+
+.home__relative-target-amount {
+  font-weight: 700;
+  font-size: 24px;
+  color: #fff;
+  margin: 4px 0 ;
+}
+
+.home__relative-target-dollar {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.home__relatives-empty {
+  text-align: center;
+  padding: 30px 0;
+}
 
 .home__relatives-empty p {
   font-weight: 600;
@@ -293,9 +442,10 @@ width: 100%;
 .home__balance-amounts {
   font-weight: 700;
   font-size: 100px;
+  margin-top: 80px   ;
   text-align: right;
   color: rgba(34, 34, 34, 0.2);
-  margin-top: auto;
+
 }
 
 .home__relatives-empty{
@@ -560,8 +710,67 @@ color: rgba(0, 0, 0, 0.5);
   color: #fff;
 }
 
+.emds{
+  background: linear-gradient(135deg, #fff 0%, #e2e2e2 100%);
+  height: 281px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+border-radius: 24px;
+}
+
+.emds .home__relatives-empty{
+  padding: 0;
+}
+
+.emds .home__relatives-empty p{
+  font-weight: 600;
+font-size: 16px;
+text-align: left;
+color: #222;
+}
+
 .home__goal-prompt-text-small{
   font-weight: 500;
 font-size: 20px;
 line-height: 100%;
+}
+
+
+.home__faq-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 16px 0;
+}
+
+.home__faq-question {
+  font-weight: 600;
+  font-size: 16px;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.home__faq-question::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  background-image: url('../../../public/images/arrow-down.svg');
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.home__faq-item.active .home__faq-question::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.home__faq-answer {
+  font-weight: 400;
+  font-size: 14px;
+  color: rgba(34, 34, 34, 0.7);
+  margin-top: 8px;
+  line-height: 1.5;
 }

@@ -79,6 +79,16 @@ height: 48px;
     justify-content: center;
 }
 
+.registration__form form{
+  display: flex
+  ;
+      flex-direction: column;
+      gap: 8px;
+      height: 100%;
+      width: 100%;
+      align-items: center;
+}
+
 .registration__title{
     font-weight: 600;
 font-size: 32px;

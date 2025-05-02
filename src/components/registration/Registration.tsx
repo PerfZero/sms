@@ -5,6 +5,7 @@ import './Registration.css';
 import { authService, userService, AuthResponse, ProfileResponse } from '../../services/api';
 import { setUser } from '../../store/slices/userSlice';
 import { User } from '../../types';
+import InputMask from 'react-input-mask';
 
 type RegistrationStep = 'initial' | 'verification' | 'password' | 'success';
 
@@ -60,19 +61,15 @@ export const Registration: React.FC = () => {
   };
 
   const handleIinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 12) {
-      setIin(value);
-      setIINError(null);
-    }
+    const value = e.target.value.replace(/[^\d]/g, '');
+    setIin(value);
+    setIINError(null);
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/\D/g, '');
-    if (value.length <= 11) {
-      setPhone(value);
-      setPhoneError(null);
-    }
+    const value = e.target.value.replace(/[^\d]/g, '');
+    setPhone(value);
+    setPhoneError(null);
   };
 
   const handleVerificationCodeChange = (index: number, value: string) => {
@@ -117,13 +114,15 @@ export const Registration: React.FC = () => {
     return password.length >= 8;
   };
 
-  const handleInitialSubmit = (e: React.FormEvent) => {
+  const handleInitialSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (iin.length !== 12) {
+    const cleanIin = iin.replace(/[^\d]/g, '');
+    const cleanPhone = phone.replace(/[^\d]/g, '');
+
+    if (cleanIin.length !== 12) {
       setIINError('ИИН должен содержать 12 цифр');
       return;
     }
-    const cleanPhone = phone.replace(/\D/g, '');
     if (cleanPhone.length !== 11) {
       setPhoneError('Номер телефона должен содержать 11 цифр');
       return;
@@ -222,29 +221,27 @@ export const Registration: React.FC = () => {
             <div className="registration__form">
               <form onSubmit={handleInitialSubmit}>
                 <div className="registration__input-group">
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                  <InputMask
+                    mask="999 999 999 999"
                     value={iin}
                     onChange={handleIinChange}
                     placeholder="Введите свой ИИН"
-                    maxLength={12}
                     className={iinError ? 'error' : ''}
-                  />
+                  >
+                    {(inputProps: any) => <input {...inputProps} type="text" />}
+                  </InputMask>
                   {iinError && <div className="registration__error">{iinError}</div>}
                 </div>
                 <div className="registration__input-group">
-                  <input
-                    type="tel"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
+                  <InputMask
+                    mask="+7 (999) 999 9999"
                     value={phone}
                     onChange={handlePhoneChange}
                     placeholder="Введите свой номер телефона"
-                    maxLength={11}
                     className={phoneError ? 'error' : ''}
-                  />
+                  >
+                    {(inputProps: any) => <input {...inputProps} type="text" />}
+                  </InputMask>
                   {phoneError && <div className="registration__error">{phoneError}</div>}
                 </div>
                 <div className="registration__login-link">

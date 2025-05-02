@@ -125,9 +125,12 @@
   color: #f14635;
 }
 
+.mbp{
+  margin-top: 0 !important;
+}
+
 .registration__login-link {
   text-align: center;
-  margin-top: 75px;
 }
 
 .registration__login-link a {
@@ -224,4 +227,81 @@ color: #35c759;
   font-size: 14px;
   color: #666;
   text-align: center;
+}
+
+.registration__checkbox-group {
+  margin: 16px 0;
+  position: relative;
+}
+
+.registration__checkbox {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.registration__checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 16px;
+  color: #000;
+  justify-content: center;
+  position: relative;
+  padding-left: 28px;
+  width: max-content;
+}
+
+
+
+.registration__checkbox-group{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Кастомный чекбокс */
+.registration__checkbox-label::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid #D5D7DA;
+  border-radius: 4px;
+  background-color: white;
+  transition: all 0.2s ease;
+}
+
+/* При наведении делаем обводку темнее */
+.registration__checkbox-label:hover::before {
+  border-color: #b8babe;
+}
+
+/* Когда чекбокс выбран, меняем цвет обводки на зеленый */
+.registration__checkbox:checked + .registration__checkbox-label::before {
+  border-color: #35c759;
+}
+
+/* Галочка внутри чекбокса */
+.registration__checkbox:checked + .registration__checkbox-label::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 3px;
+  width: 5px;
+  height: 10px;
+  border: solid #35c759;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  transition: all 0.2s ease;
+}
+
+.registration__checkbox-label span {
+  user-select: none;
 }

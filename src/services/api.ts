@@ -107,37 +107,43 @@ export interface TransactionResponse {
     userId: number;
   };
   transaction: {
+    id: number;
+    transactionNumber: string;
     amount: number;
+    type: 'DEPOSIT' | 'WITHDRAWAL';
+    status: 'PENDING' | 'COMPLETED' | 'FAILED';
+    description: string;
     iin: string;
     name: string;
-    transactionId: string;
-    timestamp: string;
-    goalId?: number;
+    date: string;
+    bonus?: number;
+    isFirstDeposit?: boolean;
     goal?: {
       currentAmount: number;
       targetAmount: number;
       relativeName: string;
     };
-    bonus?: number;
-    isFirstDeposit?: boolean;
   };
 }
 
 export interface Transaction {
   id: number;
+  transactionNumber: string;
   amount: number;
   type: 'DEPOSIT' | 'WITHDRAWAL';
   status: 'PENDING' | 'COMPLETED' | 'FAILED';
   description: string;
   iin: string;
   name: string;
+  date: string;
+  bonus?: number;
+  isFirstDeposit?: boolean;
   goalId?: number;
   goal?: {
     currentAmount: number;
     targetAmount: number;
     relativeName: string;
   };
-  date: string;
 }
 
 export const balanceService = {
@@ -176,6 +182,7 @@ export interface Goal {
     fullName: string;
     iin: string;
   };
+  createdAt: string;
 }
 
 export const goalService = {

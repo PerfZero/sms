@@ -15,11 +15,13 @@ import Home from './components/Home/Home';
 import SelfGoalSteps from './components/Goals/SelfGoalSteps';
 import FamilyGoalSteps from './components/Goals/FamilyGoalSteps';
 import History from './components/History/History';
+import GoalDetail from './components/Goals/GoalDetail';
 
 import Toolbar from './components/Toolbar/Toolbar';
 import Goals from './components/Goals/Goals';
 import './styles/base/_reset.css';
 import { useAuthInit } from './hooks/useAuthInit';
+import Footer from './components/Footer/Footer';
 
 // Protected Route component
 const ProtectedRoute: React.FC<{ element: React.ReactElement }> = ({ element }) => {
@@ -95,6 +97,14 @@ const AppRoutes: React.FC = () => {
         }
       />
       <Route
+        path="/goal/:goalId"
+        element={
+          <Layout>
+            <ProtectedRoute element={<GoalDetail />} />
+          </Layout>
+        }
+      />
+      <Route
         path="/packages"
         element={
           <Layout>
@@ -120,6 +130,7 @@ const AppWrapper = () => {
     <Provider store={store}>
       <Router>
         <AppRoutes />
+        <Footer />
       </Router>
     </Provider>
   );
